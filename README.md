@@ -1,2 +1,2 @@
 # B-well-website
-wellness app
+wellness website
