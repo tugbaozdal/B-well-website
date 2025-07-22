@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haftalık Ölçümler - Sağlıklı Yaşam</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo" onclick="window.location.href='dashboard.html'">Sağlıklı Yaşam</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="logout()">Çıkış Yap</a></li>
+            <li>
+                <a href="profile.html" class="profile-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/user.svg" alt="Profil">
+                    Profilim
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Ana İçerik -->
+    <div class="dashboard-container">
+        <h1>Haftalık Ölçümler</h1>
+        
+        <!-- Ölçüm Formu -->
+        <div class="measurement-form">
+            <form id="measurementForm" onsubmit="calculateAndSaveMeasurements(event)">
+                <div class="input-group">
+                    <label for="measurementDate">Ölçüm Tarihi</label>
+                    <input type="date" id="measurementDate" required>
+                </div>
+
+                <div class="input-group">
+                    <label for="weight">Kilo (kg)</label>
+                    <input type="number" id="weight" step="0.1" required placeholder="Örn: 70.5">
+                </div>
+                
+                <div class="input-group">
+                    <label for="waist">Bel Çevresi (cm)</label>
+                    <input type="number" id="waist" required placeholder="Örn: 80">
+                </div>
+                
+                <div class="input-group">
+                    <label for="hip">Kalça Çevresi (cm)</label>
+                    <input type="number" id="hip" required placeholder="Örn: 95">
+                </div>
+                
+                <div class="input-group">
+                    <label for="neck">Boyun Çevresi (cm)</label>
+                    <input type="number" id="neck" required placeholder="Örn: 35">
+                </div>
+                
+                <div class="input-group">
+                    <label for="height">Boy (cm)</label>
+                    <input type="number" id="height" required placeholder="Örn: 170">
+                </div>
+                
+                <button type="submit">Hesapla ve Kaydet</button>
+            </form>
+
+            <div id="results" class="hidden">
+                <h3>Hesaplanan Değerler</h3>
+                <div class="result-item">
+                    <span>Beden Kitle İndeksi (BMI):</span>
+                    <span id="bmiResult">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Bel-Kalça Oranı (WHR):</span>
+                    <span id="whrResult">-</span>
+                </div>
+                <div class="result-item">
+                    <span>Vücut Yağ Oranı (%):</span>
+                    <span id="fatResult">-</span>
+                </div>
+            </div>
+
+            <!-- Önceki Ölçümler -->
+            <div class="previous-measurements">
+                <h3>Önceki Ölçümler</h3>
+                <div id="measurementsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuP9FJQgLDM_O23P6G9vTamjOhR9UeN_4",
+            authDomain: "bwellapp.firebaseapp.com",
+            projectId: "bwellapp",
+            storageBucket: "bwellapp.firebasestorage.app",
+            messagingSenderId: "685901944017",
+            appId: "1:685901944017:web:b06fa61e797cc57140e1f0",
+            measurementId: "G-LSSZS914W4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Bugünün tarihini varsayılan olarak ayarla
+        document.getElementById('measurementDate').valueAsDate = new Date();
+
+        // Önceki ölçümleri getir
+        async function loadPreviousMeasurements(userId) {
+            const measurementsRef = collection(db, 'users', userId, 'measurements');
+            const q = query(measurementsRef, orderBy('measurementDate', 'desc'));
+            const querySnapshot = await getDocs(q);
+            
+            const measurementsList = document.getElementById('measurementsList');
+            measurementsList.innerHTML = '';
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                const date = new Date(data.measurementDate.seconds * 1000).toLocaleDateString('tr-TR');
+                
+                const measurementDiv = document.createElement('div');
+                measurementDiv.className = 'measurement-item';
+                measurementDiv.innerHTML = `
+                    <div class="measurement-date">${date}</div>
+                    <div class="measurement-values">
+                        <span>Kilo: ${data.weight} kg</span>
+                        <span>BMI: ${data.bmi}</span>
+                        <span>Yağ Oranı: ${data.bodyFat}%</span>
+                    </div>
+                `;
+                measurementsList.appendChild(measurementDiv);
+            });
+        }
+
+        // Ölçümleri hesapla ve kaydet
+        window.calculateAndSaveMeasurements = async function(event) {
+            event.preventDefault();
+            
+            const user = auth.currentUser;
+            if (!user) {
+                alert('Lütfen önce giriş yapın!');
+                return;
+            }
+
+            // Değerleri al
+            const measurementDate = new Date(document.getElementById("measurementDate").value);
+            const weight = parseFloat(document.getElementById("weight").value);
+            const waist = parseFloat(document.getElementById("waist").value);
+            const hip = parseFloat(document.getElementById("hip").value);
+            const neck = parseFloat(document.getElementById("neck").value);
+            const height = parseFloat(document.getElementById("height").value);
+            
+            // BMI hesapla (kg/m²)
+            const heightInMeters = height / 100;
+            const bmi = weight / (heightInMeters * heightInMeters);
+            
+            // WHR hesapla (Bel/Kalça oranı)
+            const whr = waist / hip;
+            
+            // Vücut yağ oranı hesapla (Navy Body Fat Formula)
+            const bodyFat = 495 / (1.0324 - 0.19077 * Math.log10(waist - neck) + 0.15456 * Math.log10(height)) - 450;
+            
+            // Sonuçları göster
+            document.getElementById("bmiResult").textContent = bmi.toFixed(1);
+            document.getElementById("whrResult").textContent = whr.toFixed(2);
+            document.getElementById("fatResult").textContent = bodyFat.toFixed(1);
+            document.getElementById("results").classList.remove("hidden");
+
+            try {
+                // Firestore'a kaydet
+                const measurementsRef = collection(db, 'users', user.uid, 'measurements');
+                await addDoc(measurementsRef, {
+                    measurementDate: measurementDate,
+                    weight,
+                    waist,
+                    hip,
+                    neck,
+                    height,
+                    bmi: bmi.toFixed(1),
+                    whr: whr.toFixed(2),
+                    bodyFat: bodyFat.toFixed(1),
+                    timestamp: serverTimestamp()
+                });
+
+                alert('Ölçümleriniz başarıyla kaydedildi!');
+                document.getElementById("measurementForm").reset();
+                document.getElementById('measurementDate').valueAsDate = new Date();
+                
+                // Önceki ölçümleri yeniden yükle
+                await loadPreviousMeasurements(user.uid);
+            } catch (error) {
+                console.error("Hata:", error);
+                alert('Ölçümler kaydedilirken bir hata oluştu. Lütfen tekrar deneyin.');
+            }
+        };
+
+        // Kullanıcı durumunu kontrol et
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                loadPreviousMeasurements(user.uid);
+            }
+        });
+    </script>
+</body>
+</html> 

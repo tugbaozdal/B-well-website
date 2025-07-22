@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sağlıklı Yaşam</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo" onclick="window.location.href='index.html'">
+      <div class="logo-icon">
+        <i class="fas fa-running"></i>
+      </div>
+      <span>B-Well</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#" class="register-btn" onclick="openModal()"><i class="fas fa-user-plus"></i> Giriş Yap</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <header class="hero">
+    <div class="hero-content">
+      <h1 class="animate-text">Sağlıklı Bir Yaşam İçin İlk Adımı At!</h1>
+      <p class="animate-text-delay">Kendini daha iyi hissetmek için ölçümlerini takip et, beslenmeni düzenle ve ilerlemeni gör.</p>
+      <div class="hero-buttons">
+        <button class="primary-btn" onclick="showSignup()">
+          <i class="fas fa-rocket"></i> Hemen Başla
+        </button>
+        <button class="secondary-btn" onclick="scrollToFeatures()">
+          <i class="fas fa-info-circle"></i> Daha Fazla Bilgi
+        </button>
+      </div>
+      <div class="hero-stats">
+        <div class="stat-item">
+          <i class="fas fa-users"></i>
+          <span class="stat-number">10K+</span>
+          <span class="stat-text">Aktif Kullanıcı</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-chart-line"></i>
+          <span class="stat-number">95%</span>
+          <span class="stat-text">Başarı Oranı</span>
+        </div>
+        <div class="stat-item">
+          <i class="fas fa-heart"></i>
+          <span class="stat-number">4.9</span>
+          <span class="stat-text">Kullanıcı Memnuniyeti</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80" alt="Sağlıklı Yaşam">
+    </div>
+  </header>
+
+  <!-- Özellikler -->
+  <section class="features">
+    <h2 class="section-title">Neden Bizi Seçmelisiniz?</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h3>Ölçümlerini Takip Et</h3>
+        <p>Kilonu, vücut ölçülerini ve diğer sağlık verilerini kolayca kaydet ve ilerlemeni gör.</p>
+        <ul class="feature-list">
+          <li><i class="fas fa-check"></i> Detaylı vücut analizi</li>
+          <li><i class="fas fa-check"></i> İlerleme grafikleri</li>
+          <li><i class="fas fa-check"></i> Hedef takibi</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-apple-alt"></i>
+        </div>
+        <h3>Akıllı Beslenme</h3>
+        <p>Günlük kalori ihtiyacını hesapla, besin değerlerini öğren ve dengeli beslen.</p>
+        <ul class="feature-list">
+          <li><i class="fas fa-check"></i> Kalori hesaplama</li>
+          <li><i class="fas fa-check"></i> Besin değeri analizi</li>
+          <li><i class="fas fa-check"></i> Özel diyet planları</li>
+        </ul>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">
+          <i class="fas fa-bell"></i>
+        </div>
+        <h3>Kişiselleştirilmiş Hatırlatmalar</h3>
+        <p>Su içme, egzersiz ve sağlıklı beslenme için özel hatırlatmalar al.</p>
+        <ul class="feature-list">
+          <li><i class="fas fa-check"></i> Akıllı bildirimler</li>
+          <li><i class="fas fa-check"></i> Özelleştirilebilir hatırlatmalar</li>
+          <li><i class="fas fa-check"></i> Motivasyon mesajları</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Nasıl Çalışır -->
+  <section class="how-it-works">
+    <h2 class="section-title">Nasıl Çalışır?</h2>
+    <div class="steps-container">
+      <div class="step">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h3>Üye Ol</h3>
+          <p>Hızlı ve kolay kayıt işlemi ile hemen başla.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h3>Hedefini Belirle</h3>
+          <p>Sağlık hedeflerini belirle ve kişisel planını oluştur.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h3>İlerlemeni Takip Et</h3>
+          <p>Düzenli ölçümler ve analizlerle ilerlemeni gör.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!-- Modal Arka Plan -->
+<div id="authModal" class="modal hidden">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">&times;</span>
+  
+      <!-- Giriş / Üye Ol Sekmeleri -->
+      <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+        <button onclick="showLogin()" style="flex: 1; margin-right: 10px;">Giriş Yap</button>
+        <button onclick="showSignup()" style="flex: 1;">Üye Ol</button>
+      </div>
+  
+      <!-- Giriş Formu -->
+      <div id="loginForm">
+        <h2>Giriş Yap</h2>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Şifre">
+        <button onclick="login()">Giriş Yap</button>
+        <div class="social-login">
+          <p>veya</p>
+          <button onclick="loginWithGoogle()" class="google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Google ile Giriş Yap
+          </button>
+        </div>
+      </div>
+  
+      <!-- Üye Ol Formu -->
+      <div id="signupForm" class="hidden">
+        <h2>Üye Ol</h2>
+        <input type="email" id="signupEmail" placeholder="Email">
+        <input type="password" id="signupPassword" placeholder="Şifre">
+        <button onclick="signup()">Üye Ol</button>
+        <div class="social-login">
+          <p>veya</p>
+          <button onclick="loginWithGoogle()" class="google-btn">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+            Google ile Üye Ol
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  
+  <!-- Ölçüm Modal -->
+  <div id="measurementModal" class="modal hidden">
+    <div class="modal-content">
+        <span class="close-btn" onclick="closeMeasurementModal()">&times;</span>
+        <h2>Haftalık Ölçümler</h2>
+        
+        <form id="measurementForm" onsubmit="calculateMeasurements(event)">
+            <div class="input-group">
+                <label for="weight">Kilo (kg)</label>
+                <input type="number" id="weight" step="0.1" required placeholder="Örn: 70.5">
+            </div>
+            
+            <div class="input-group">
+                <label for="waist">Bel Çevresi (cm)</label>
+                <input type="number" id="waist" required placeholder="Örn: 80">
+            </div>
+            
+            <div class="input-group">
+                <label for="hip">Kalça Çevresi (cm)</label>
+                <input type="number" id="hip" required placeholder="Örn: 95">
+            </div>
+            
+            <div class="input-group">
+                <label for="neck">Boyun Çevresi (cm)</label>
+                <input type="number" id="neck" required placeholder="Örn: 35">
+            </div>
+            
+            <div class="input-group">
+                <label for="height">Boy (cm)</label>
+                <input type="number" id="height" required placeholder="Örn: 170">
+            </div>
+            
+            <button type="submit">Hesapla</button>
+        </form>
+
+        <div id="results" class="hidden">
+            <h3>Hesaplanan Değerler</h3>
+            <div class="result-item">
+                <span>Beden Kitle İndeksi (BMI):</span>
+                <span id="bmiResult">-</span>
+            </div>
+            <div class="result-item">
+                <span>Bel-Kalça Oranı (WHR):</span>
+                <span id="whrResult">-</span>
+            </div>
+            <div class="result-item">
+                <span>Vücut Yağ Oranı (%):</span>
+                <span id="fatResult">-</span>
+            </div>
+        </div>
+    </div>
+</div>
+  
+  
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3><i class="fas fa-heartbeat"></i> Sağlıklı Yaşam</h3>
+        <p>Sağlıklı bir yaşam için yanınızdayız.</p>
+      </div>
+      <div class="footer-section">
+        <h3>İletişim</h3>
+        <p><i class="fas fa-envelope"></i> info@saglikliyasam.com</p>
+        <p><i class="fas fa-phone"></i> +90 555 123 4567</p>
+      </div>
+      <div class="footer-section">
+        <h3>Sosyal Medya</h3>
+        <div class="social-links">
+          <a href="#"><i class="fab fa-facebook"></i></a>
+          <a href="#"><i class="fab fa-twitter"></i></a>
+          <a href="#"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2025 Sağlıklı Yaşam | Tüm Hakları Saklıdır</p>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="modal.js"></script>
+  <script type="module" src="auth.js"></script>
+
+  <script>
+    const APP_ID = "2f29af51"; // Nutritionix App ID'nizi buraya ekleyin
+    const APP_KEY = "1f295bbea7bfe80dc5f8d9c23c5ca34b"; // Nutritionix API Key'inizi buraya ekleyin
+
+    // Besin arama fonksiyonu
+    async function searchFood() {
+        const searchInput = document.getElementById('foodSearch').value.trim();
+        
+        try {
+            const response = await fetch('https://trackapi.nutritionix.com/v2/search/instant', {
+                method: 'GET',
+                headers: {
+                    'x-app-id': APP_ID,
+                    'x-app-key': APP_KEY,
+                    'x-remote-user-id': '0'
+                },
+                params: {
+                    query: searchInput
+                }
+            });
+
+            const data = await response.json();
+            displayResults(data.common);
+        } catch (error) {
+            console.error('Arama hatası:', error);
+            alert('Arama sırasında bir hata oluştu.');
+        }
+    }
+
+    // Besin detaylarını getirme fonksiyonu
+    async function getFoodDetails(foodName) {
+        try {
+            const response = await fetch('https://trackapi.nutritionix.com/v2/natural/nutrients', {
+                method: 'POST',
+                headers: {
+                    'x-app-id': APP_ID,
+                    'x-app-key': APP_KEY,
+                    'x-remote-user-id': '0',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    query: foodName
+                })
+            });
+
+            const data = await response.json();
+            if (data.foods && data.foods.length > 0) {
+                displayFoodDetails(data.foods[0]);
+            }
+        } catch (error) {
+            console.error('Detay hatası:', error);
+            alert('Besin detayları alınırken bir hata oluştu.');
+        }
+    }
+
+    function scrollToFeatures() {
+      const featuresSection = document.querySelector('.features');
+      featuresSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

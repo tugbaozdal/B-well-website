@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafikler - Sağlıklı Yaşam</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo" onclick="window.location.href='dashboard.html'">Sağlıklı Yaşam</div>
+        <ul class="nav-links">
+            <li><a href="#" onclick="logout()">Çıkış Yap</a></li>
+            <li>
+                <a href="profile.html" class="profile-btn">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/user.svg" alt="Profil">
+                    Profilim
+                </a>
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Ana İçerik -->
+    <div class="dashboard-container">
+        <h1>İlerleme Grafikleri</h1>
+        
+        <div class="graphs-container">
+            <!-- Kilo Grafiği -->
+            <div class="graph-card">
+                <h2>Kilo Değişimi (kg)</h2>
+                <canvas id="weightChart"></canvas>
+            </div>
+
+            <!-- BMI Grafiği -->
+            <div class="graph-card">
+                <h2>BMI Değişimi</h2>
+                <canvas id="bmiChart"></canvas>
+            </div>
+
+            <!-- Yağ Oranı Grafiği -->
+            <div class="graph-card">
+                <h2>Vücut Yağ Oranı (%)</h2>
+                <canvas id="fatChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDuP9FJQgLDM_O23P6G9vTamjOhR9UeN_4",
+            authDomain: "bwellapp.firebaseapp.com",
+            projectId: "bwellapp",
+            storageBucket: "bwellapp.firebasestorage.app",
+            messagingSenderId: "685901944017",
+            appId: "1:685901944017:web:b06fa61e797cc57140e1f0",
+            measurementId: "G-LSSZS914W4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Grafik renkleri ve stilleri
+        const chartColors = {
+            weight: {
+                border: 'rgb(75, 192, 192)',
+                background: 'rgba(75, 192, 192, 0.2)'
+            },
+            bmi: {
+                border: 'rgb(255, 99, 132)',
+                background: 'rgba(255, 99, 132, 0.2)'
+            },
+            fat: {
+                border: 'rgb(153, 102, 255)',
+                background: 'rgba(153, 102, 255, 0.2)'
+            }
+        };
+
+        // Grafikleri oluştur
+        function createCharts(data) {
+            // Tarihleri formatla
+            const dates = data.map(d => new Date(d.measurementDate.seconds * 1000).toLocaleDateString('tr-TR'));
+            
+            // Kilo grafiği
+            new Chart(document.getElementById('weightChart'), {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Kilo (kg)',
+                        data: data.map(d => d.weight),
+                        borderColor: chartColors.weight.border,
+                        backgroundColor: chartColors.weight.background,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Kilo Değişimi'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            // BMI grafiği
+            new Chart(document.getElementById('bmiChart'), {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'BMI',
+                        data: data.map(d => parseFloat(d.bmi)),
+                        borderColor: chartColors.bmi.border,
+                        backgroundColor: chartColors.bmi.background,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'BMI Değişimi'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+
+            // Yağ oranı grafiği
+            new Chart(document.getElementById('fatChart'), {
+                type: 'line',
+                data: {
+                    labels: dates,
+                    datasets: [{
+                        label: 'Yağ Oranı (%)',
+                        data: data.map(d => parseFloat(d.bodyFat)),
+                        borderColor: chartColors.fat.border,
+                        backgroundColor: chartColors.fat.background,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Vücut Yağ Oranı Değişimi'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Ölçümleri getir ve grafikleri oluştur
+        async function loadMeasurements(userId) {
+            try {
+                const measurementsRef = collection(db, 'users', userId, 'measurements');
+                const q = query(measurementsRef, orderBy('measurementDate', 'asc'));
+                const querySnapshot = await getDocs(q);
+                
+                const measurements = [];
+                querySnapshot.forEach((doc) => {
+                    measurements.push(doc.data());
+                });
+
+                if (measurements.length > 0) {
+                    createCharts(measurements);
+                } else {
+                    document.querySelector('.graphs-container').innerHTML = '<p class="no-data">Henüz ölçüm kaydı bulunmuyor.</p>';
+                }
+            } catch (error) {
+                console.error("Hata:", error);
+                alert('Veriler yüklenirken bir hata oluştu.');
+            }
+        }
+
+        // Kullanıcı durumunu kontrol et
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'index.html';
+            } else {
+                loadMeasurements(user.uid);
+            }
+        });
+    </script>
+</body>
+</html> 

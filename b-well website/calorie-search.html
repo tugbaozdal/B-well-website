@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kalori Ara - Sağlıklı Yaşam</title>
+  <link rel="stylesheet" href="styles.css"/>
+  <link rel="stylesheet" href="dashboard.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo" onclick="window.location.href='dashboard.html'">Sağlıklı Yaşam</div>
+    <ul class="nav-links">
+      <li><a href="calorie-search.html"><i class="fas fa-calculator"></i> Kalori Hesapla</a></li>
+      <li><a href="#" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a></li>
+      <li>
+        <a href="profile.html" class="profile-btn">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/user.svg" alt="Profil" />
+          Profilim
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <!-- Ana İçerik -->
+  <div class="dashboard-container">
+    <h1>Kalori Ara</h1>
+
+    <div class="search-container">
+      <div class="search-box">
+        <input type="text" id="foodSearch" placeholder="Besin adı girin (örn: elma, tavuk göğsü)" />
+        <button onclick="searchFood()" id="searchButton">
+          <i class="fas fa-search"></i> Ara
+        </button>
+      </div>
+
+      <div id="searchResults" class="search-results hidden">
+        <h2>Arama Sonuçları</h2>
+        <div id="resultsList"></div>
+      </div>
+
+      <div id="foodDetail" class="food-detail hidden">
+        <button class="close-btn" onclick="closeFoodDetail()">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="detail-content">
+          <div class="detail-header">
+            <h3 id="foodName"></h3>
+            <span id="foodBrand"></span>
+          </div>
+          <div class="nutrition-facts">
+            <div class="fact-item">
+              <span class="label">Kalori</span>
+              <span class="value" id="calories"></span>
+            </div>
+            <div class="fact-item">
+              <span class="label">Protein</span>
+              <span class="value" id="protein"></span>
+            </div>
+            <div class="fact-item">
+              <span class="label">Karbonhidrat</span>
+              <span class="value" id="carbs"></span>
+            </div>
+            <div class="fact-item">
+              <span class="label">Yağ</span>
+              <span class="value" id="fat"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="auth.js" type="module"></script>
+  <script>
+    const APP_ID = "2f29af51";
+    const APP_KEY = "1f295bbea7bfe80dc5f8d9c23c5ca34b";
+
+    async function searchFood() {
+      const searchInput = document.getElementById('foodSearch').value.trim();
+      const searchButton = document.getElementById('searchButton');
+      const resultsList = document.getElementById('resultsList');
+
+      if (!searchInput) {
+        alert('Lütfen bir besin adı girin.');
+        return;
+      }
+
+      try {
+        searchButton.disabled = true;
+        searchButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aranıyor...';
+        resultsList.innerHTML = '<div class="loading">Aranıyor...</div>';
+        document.getElementById('searchResults').classList.remove('hidden');
+
+        const response = await fetch(`https://trackapi.nutritionix.com/v2/search/instant?query=${encodeURIComponent(searchInput)}&locale=tr_TR`, {
+          method: 'GET',
+          headers: {
+            'x-app-id': APP_ID,
+            'x-app-key': APP_KEY,
+            'x-remote-user-id': '0'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`API yanıt hatası: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('API yanıtı:', data); // Debug için
+
+        if (!data.common || data.common.length === 0) {
+          resultsList.innerHTML = `
+            <div class="no-results">
+              <i class="fas fa-search"></i>
+              <p>Sonuç bulunamadı. Lütfen başka bir besin adı deneyin.</p>
+            </div>
+          `;
+          return;
+        }
+
+        displaySearchResults(data.common);
+      } catch (error) {
+        console.error('Arama hatası:', error);
+        resultsList.innerHTML = `
+          <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Arama sırasında bir hata oluştu. Lütfen tekrar deneyin.</p>
+            <p class="error-details">${error.message}</p>
+          </div>
+        `;
+      } finally {
+        searchButton.disabled = false;
+        searchButton.innerHTML = '<i class="fas fa-search"></i> Ara';
+      }
+    }
+
+    function displaySearchResults(foods) {
+      const resultsDiv = document.getElementById('resultsList');
+      resultsDiv.innerHTML = '';
+
+      foods.forEach(food => {
+        const foodDiv = document.createElement('div');
+        foodDiv.className = 'food-item';
+        foodDiv.innerHTML = `
+          <div class="food-info">
+            <h3>${food.food_name}</h3>
+            <span class="brand">${food.brand_name || 'Marka belirtilmemiş'}</span>
+          </div>
+          <button onclick="getFoodDetails('${food.food_name}')" class="detail-btn">
+            <i class="fas fa-info-circle"></i> Detaylar
+          </button>
+        `;
+        resultsDiv.appendChild(foodDiv);
+      });
+    }
+
+    async function getFoodDetails(foodName) {
+      const foodDetail = document.getElementById('foodDetail');
+      const overlay = document.createElement('div');
+      overlay.className = 'overlay';
+      document.body.appendChild(overlay);
+
+      foodDetail.classList.remove('hidden');
+      overlay.classList.add('active');
+
+      try {
+        const response = await fetch('https://trackapi.nutritionix.com/v2/natural/nutrients', {
+          method: 'POST',
+          headers: {
+            'x-app-id': APP_ID,
+            'x-app-key': APP_KEY,
+            'x-remote-user-id': '0',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            query: foodName,
+            locale: 'tr_TR'
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(`API yanıt hatası: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log('Detay API yanıtı:', data);
+
+        if (!data.foods || data.foods.length === 0) {
+          throw new Error('Besin detayları bulunamadı');
+        }
+
+        displayFoodDetails(data.foods[0]);
+      } catch (error) {
+        console.error('Detay hatası:', error);
+        foodDetail.innerHTML = `
+          <button class="close-btn" onclick="closeFoodDetail()">
+            <i class="fas fa-times"></i>
+          </button>
+          <div class="error">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Besin detayları alınamadı. Lütfen tekrar deneyin.</p>
+            <p class="error-details">${error.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    function displayFoodDetails(food) {
+      document.getElementById('foodName').textContent = food.food_name;
+      document.getElementById('foodBrand').textContent = food.brand_name || 'Markasız';
+      document.getElementById('calories').textContent = `${food.nf_calories} kcal`;
+      document.getElementById('protein').textContent = `${food.nf_protein}g`;
+      document.getElementById('carbs').textContent = `${food.nf_total_carbohydrate}g`;
+      document.getElementById('fat').textContent = `${food.nf_total_fat}g`;
+    }
+
+    // Enter tuşu ile arama yapma
+    document.getElementById('foodSearch').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        searchFood();
+      }
+    });
+
+    function closeFoodDetail() {
+      const foodDetail = document.getElementById('foodDetail');
+      const overlay = document.querySelector('.overlay');
+      
+      if (foodDetail) {
+        foodDetail.classList.add('hidden');
+      }
+      
+      if (overlay) {
+        overlay.classList.remove('active');
+        setTimeout(() => overlay.remove(), 300);
+      }
+    }
+
+    // Overlay'e tıklandığında detay sayfasını kapat
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('overlay')) {
+        closeFoodDetail();
+      }
+    });
+  </script>
+
+  <style>
+    .food-detail {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+      margin-top: 0;
+      z-index: 1000;
+      width: 90%;
+      max-width: 500px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    .food-detail.hidden {
+      display: none;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      color: #666;
+      cursor: pointer;
+      padding: 0.5rem;
+      transition: color 0.3s ease;
+      z-index: 1001;
+    }
+
+    .close-btn:hover {
+      color: #333;
+    }
+
+    .detail-content {
+      margin-top: 1rem;
+    }
+
+    .detail-header {
+      margin-bottom: 1.5rem;
+      padding-right: 2rem;
+    }
+
+    .detail-header h3 {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: #333;
+    }
+
+    .detail-header span {
+      color: #666;
+      font-size: 0.9rem;
+    }
+
+    .nutrition-facts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      padding: 1rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .fact-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      background: white;
+      border-radius: 6px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .fact-item .label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .fact-item .value {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    /* Overlay arka plan */
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 999;
+      display: none;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+  </style>
+</body>
+</html>

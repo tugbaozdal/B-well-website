@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Sağlıklı Yaşam</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo" onclick="window.location.href='dashboard.html'">Sağlıklı Yaşam</div>
+        <ul class="nav-links">
+            <li><a href="calorie-search.html"><i class="fas fa-calculator"></i> Kalori Hesapla</a></li>
+            <li><a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Çıkış Yap</a></li>
+            <li><a href="profile.html"><i class="fas fa-user"></i> Profil</a></li>
+        </ul>
+    </nav>
+
+    <!-- Dashboard Container -->
+    <div class="dashboard-container">
+        <!-- Hoşgeldin Mesajı -->
+        <div class="welcome-section">
+            <h1>Hoş Geldin, <span id="userName">Kullanıcı</span>!</h1>
+            <p>Bugün nasıl hissediyorsun?</p>
+        </div>
+
+        <!-- Ana İçerik -->
+        <div class="dashboard-grid">
+            <!-- Sol Kolon -->
+            <div class="dashboard-column">
+                <!-- Ölçüm Kartı -->
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-ruler"></i> Ölçümlerim</h2>
+                    <button class="primary-btn" onclick="window.location.href='measurements.html'">
+                        <i class="fas fa-plus"></i> Yeni Ölçüm Ekle
+                    </button>
+                    <div class="measurement-history">
+                        <h3>Son Ölçümler</h3>
+                        <div id="measurementList" class="history-list">
+                            <!-- Ölçümler JavaScript ile eklenecek -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grafikler Kartı -->
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-chart-line"></i> Grafikler</h2>
+                    <div class="graphs-preview">
+                        <p>Ölçümlerinizi ve ilerlemenizi grafiklerle takip edin.</p>
+                        <button class="primary-btn" onclick="window.location.href='graphs.html'">
+                            <i class="fas fa-chart-bar"></i> Grafikleri Görüntüle
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Kolon -->
+            <div class="dashboard-column">
+                <!-- Beslenme Kartı -->
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-utensils"></i> Günlük Beslenme</h2>
+                    <div class="nutrition-summary">
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Protein</span>
+                            <span class="nutrition-value" id="proteinValue">--g</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Karbonhidrat</span>
+                            <span class="nutrition-value" id="carbsValue">--g</span>
+                        </div>
+                        <div class="nutrition-item">
+                            <span class="nutrition-label">Yağ</span>
+                            <span class="nutrition-value" id="fatValue">--g</span>
+                        </div>
+                    </div>
+                    <button class="secondary-btn" onclick="window.location.href='calorie-search.html'">
+                        <i class="fas fa-plus"></i> Yemek Ekle
+                    </button>
+                </div>
+
+                <!-- Hatırlatıcılar Kartı -->
+                <div class="dashboard-card">
+                    <h2><i class="fas fa-bell"></i> Hatırlatıcılar</h2>
+                    <div class="reminders-list">
+                        <div class="reminder-item">
+                            <i class="fas fa-glass-water"></i>
+                            <span>Su içme zamanı!</span>
+                            <span class="reminder-time">10:00</span>
+                        </div>
+                        <div class="reminder-item">
+                            <i class="fas fa-dumbbell"></i>
+                            <span>Egzersiz zamanı</span>
+                            <span class="reminder-time">18:00</span>
+                        </div>
+                        <div class="reminder-item">
+                            <i class="fas fa-apple-alt"></i>
+                            <span>Öğün zamanı</span>
+                            <span class="reminder-time">12:30</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ölçüm Modal -->
+    <div id="measurementModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeMeasurementModal()">&times;</span>
+            <h2>Yeni Ölçüm Ekle</h2>
+            <form id="measurementForm" onsubmit="saveMeasurement(event)">
+                <div class="input-group">
+                    <label for="weight">Kilo (kg)</label>
+                    <input type="number" id="weight" step="0.1" required>
+                </div>
+                <div class="input-group">
+                    <label for="waist">Bel Çevresi (cm)</label>
+                    <input type="number" id="waist" required>
+                </div>
+                <div class="input-group">
+                    <label for="hip">Kalça Çevresi (cm)</label>
+                    <input type="number" id="hip" required>
+                </div>
+                <div class="input-group">
+                    <label for="neck">Boyun Çevresi (cm)</label>
+                    <input type="number" id="neck" required>
+                </div>
+                <button type="submit" class="primary-btn">Kaydet</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js" type="module"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html> 
